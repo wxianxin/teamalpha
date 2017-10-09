@@ -17,12 +17,15 @@ def is_summer_time(aware_dt):
     return bool(aware_dt.dst())
 
 
+
+
+
 # try to get one feed request, if succeed, append feed to data list and return True, if fail return False
 def try_get_feed(ticker, start, end, hist_data):
     try:
         feed = public_client.get_product_historic_rates(ticker, start, end, granularity=1)
         if len(feed) == 0:
-            print('empty record')
+            print('empty record, get next feed...')
             return True
         if feed[0] != 'message':
             for record in reversed(feed):
@@ -30,11 +33,11 @@ def try_get_feed(ticker, start, end, hist_data):
                 print(record)
                 hist_data.append(record)
             return True
-        print('get message as return')
+        print('get message as return, retry...')
         time.sleep(0.5)
         return False
     except:
-        print('exception here')
+        print('exception here, retry...')
         time.sleep(0.5)
         return False
 
@@ -55,12 +58,15 @@ def get_hist_price(ticker, start_date, periods):
         time_range = pd.date_range(date, periods=480, freq='0.05H')
         for i in range(len(time_range) - 1):
             j = 0
+            print("getting {} data from {} to {}...".format(ticker, time_range[i], time_range[i + 1]))
             while True:
                 if j > 10:
                     print('fail to get data from {} to {}'.format(time_range[i], time_range[i + 1]))
-                    warning_message.append("fail to get data from {} to {}".format(time_range[i], time_range[i + 1]))
+                    warning_message.append("fail to get {} data from {} to {}".format(ticker, time_range[i], time_range[i + 1]))
                     break
                 if try_get_feed(ticker.upper()+'-USD', time_range[i], time_range[i+1], hist_eth):
+                    if j > 0:
+                        print('retry succeeded!')
                     break
                 j += 1
         df = pd.DataFrame(hist_eth)
@@ -77,7 +83,7 @@ def get_start_date_and_time(path):
             if date.strftime("%Y-%m-%d") + '.csv' in files:
                 continue
             else:
-                pacific = pytz.timezone('America/New_York')
+                pacific = pytz.timezone('US/Eastern')
                 aware = pacific.localize(date, is_dst=None)
                 if is_summer_time(aware):
                     date += timedelta(hours=4)
