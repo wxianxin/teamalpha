@@ -60,7 +60,7 @@ def get_hist_price(ticker, start_date, periods):
                     print('fail to get data from {} to {}'.format(time_range[i], time_range[i + 1]))
                     warning_message.append("fail to get data from {} to {}".format(time_range[i], time_range[i + 1]))
                     break
-                if try_get_feed(ticker, time_range[i], time_range[i+1], hist_eth):
+                if try_get_feed(ticker.upper()+'-USD', time_range[i], time_range[i+1], hist_eth):
                     break
                 j += 1
         df = pd.DataFrame(hist_eth)
@@ -90,4 +90,4 @@ def continue_retrieval(ticker):
     path = 'data/{}/'.format(ticker)
     start_time = get_start_date_and_time(path)
     if start_time:
-        get_hist_price(ticker.upper() + '-USD', start_time, 200)
+        get_hist_price(ticker, start_time, 200)
