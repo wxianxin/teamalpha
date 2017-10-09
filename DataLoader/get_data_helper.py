@@ -64,7 +64,7 @@ def get_hist_price(ticker, start_date, periods):
                     break
                 j += 1
         df = pd.DataFrame(hist_eth)
-        df.to_csv('data/eth/' + date.strftime("%Y-%m-%d") + '.csv', index=False, header=False)
+        df.to_csv('data/{}/'.format(ticker.lower()) + date.strftime("%Y-%m-%d") + '.csv', index=False, header=False)
         write_log(warning_message)
 
 
