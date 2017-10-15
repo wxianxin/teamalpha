@@ -20,6 +20,7 @@ def is_summer_time(aware_dt):
 def try_get_feed(ticker, start, end, hist_data, granularity=1):
     try:
         feed = public_client.get_product_historic_rates(ticker, start, end, granularity)
+
         if len(feed) == 0:
             print('empty record, get next feed...')
             return True
@@ -45,7 +46,7 @@ def write_log(warning_message):
         log.write("%s\n" % item)
 
 
-def get_hist_price(ticker, start_date, periods):
+def get_hist_price(ticker, start_date, periods, granularity):
     warning_message = []
     date_range = pd.date_range(start_date, periods=periods, freq='1D')
     for date in date_range:
@@ -55,12 +56,13 @@ def get_hist_price(ticker, start_date, periods):
         for i in range(len(time_range) - 1):
             j = 0
             print("getting {} data from {} to {}...".format(ticker, time_range[i], time_range[i + 1]))
+            print('----')
             while True:
                 if j > 10:
                     print('fail to get data from {} to {}'.format(time_range[i], time_range[i + 1]))
                     warning_message.append("fail to get {} data from {} to {}".format(ticker, time_range[i], time_range[i + 1]))
                     break
-                if try_get_feed(ticker.upper()+'-USD', time_range[i], time_range[i+1], hist_eth):
+                if try_get_feed(ticker.upper()+'-USD', time_range[i], time_range[i+1], hist_eth, granularity):
                     if j > 0:
                         print('retry succeeded!')
                     break
@@ -88,14 +90,18 @@ def get_start_date_and_time(path, start_date):
                 return date
 
 
-def continue_retrieval(ticker, start_date):
+def continue_retrieval(ticker, start_date, granularity):
     path = 'data/{}/'.format(ticker)
     start_time = get_start_date_and_time(path, start_date)
     if start_time:
-        get_hist_price(ticker, start_time, 200)
+        get_hist_price(ticker, start_time, 200, granularity)
 
+# ticker = 'btc'
+# start_date = '5/1/2017'
+# granularity = 100
 
 ticker = input('This is a data loader application. Type in btc or eth or ltc to get data\n')
 start_date = input('since when? you can type a date, for example, 5/1/2017\n')
+granularity = input('Time interval of data points, unit in second, for example: 1 hour is "3600"\n')
 
-continue_retrieval(ticker, start_date)
+continue_retrieval(ticker, start_date, granularity)
